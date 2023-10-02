@@ -1,7 +1,7 @@
 import torch as t
 import torch.nn as nn
 import torch.nn.functional as F
-import mlp
+import transformer.mlp as mlp
 
 
 class RNN(nn.Module):
@@ -70,7 +70,7 @@ class StandardRNN(nn.Module):
 
 
 def most_recent_model():
-    import tokenizer 
+    import train.tokenizer as tokenizer 
     import os
     models = os.listdir("./models")
     models.sort()

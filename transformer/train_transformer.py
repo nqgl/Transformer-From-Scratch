@@ -1,16 +1,18 @@
 import transformer
 import torch
-import sspear_parse
-import tokenizer
+import traindata.parsedfiles as parsedfiles
+import traindata.tokenizer as tokenizer
 import torch.nn.functional as F
 
-def get_tokens(length=1000, batchsize=1, batches=1):
-    for j in range(batches):
-        l = []
-        for i in range(batchsize):
-            l.append(sspear_parse.sspeare_tensor[batchsize*length*j + i*length:batchsize*length*j + (i+1)*length])
-        yield torch.stack(l)
+def get_get_tokens(dataset):
+    def get_tokens(length=1000, batchsize=1, batches=1):
+        for j in range(batches):
+            l = []
+            for i in range(batchsize):
+                l.append(dataset[batchsize*length*j + i*length:batchsize*length*j + (i+1)*length])
+            yield torch.stack(l)
 
+get_tokens = get_get_tokens(parsedfiles.sspeare_tensor)
 
 def criterion(y_pred, y_i):
     # caps_pred = F.sigmoid(y_pred[:, :1])

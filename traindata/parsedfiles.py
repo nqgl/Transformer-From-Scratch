@@ -1,4 +1,4 @@
-shakespeare = open('/home/g/learn/dl/torch/yttutorial/t8.shakespeare.txt', 'r').read()
+shakespeare = open('', 'r').read()
 startpoints = [i for i in range(len(shakespeare)) if shakespeare.startswith('\n\n', i)]
 s = startpoints[504]
 print(len(shakespeare))

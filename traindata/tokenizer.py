@@ -166,6 +166,37 @@ def sample_transformer(model, start_string, length=100, temperature=1, topk=5, s
             print()
         return output_string
 
+def sample_transformer_generate_mode(model, start_string, length=100, temperature=1, topk=5, show=True):
+    import transformer
+    model.eval()
+    with torch.no_grad():
+        input = string_to_tensor(start_string)
+        output_string = start_string
+        model.begin_generate(length + len(start_string), batchsize=1)
+        output = model.generate_first(input.reshape(1,  -1, ALPHABET_SIZE))
+        char_pred = output[:, -1]
+        # print(transformer.inspect(model))
+        if show:
+            print(output_string, end="")
+        for i in range(length):
+            if (i + len(start_string)) % 400 == 0:
+                print("\n", i + len(start_string))
+            torch.cuda.empty_cache()
+            char = tensor_to_string_stochastic(char_pred, temperature=temperature, topk=topk)
+            print(char, end="") if show else None
+            output_string += char
+            newchar_tensor = char_to_tensor_without_pe(char).clone()
+            newchar_tensor[len(alphabet) + 1:] += positional_embedding(len(start_string) + i, ALPHABET_SIZE - len(alphabet) - 1)
+            char_pred = model.generate_next(newchar_tensor.reshape(1, -1, ALPHABET_SIZE))[:,-1, :]
+            # print(transformer.inspect(model))
+            # print(f"char_pred{char_pred}")
+            # input = string_to_tensor(output_string)
+            # input = torch.cat((input, newchar_tensor.reshape(1, -1)), dim=0)
+        if show:
+            print()
+        return output_string
+
+
 class LazyTokenized:
     def __init__(self, string):
         self.string = string
@@ -215,9 +246,11 @@ def main():
     # # s = sample_rnn(model.to(device), "q", length=100, temperature=0.5, topk=5)
     # get most recent model's path from models/
     import os
-    import sspear_parse
+    import train.parsedfiles as parsedfiles
     model = model800
-    sample_transformer(model.to(device), sspear_parse.shakespeare[6200:7000], length=800, temperature=1, topk=10)
+    model2 = transformer.most_recent_model("/home/g/learn/dl/torch/models/sspeare_ztransformer_1839*")
+    model = model2
+    # sample_transformer(model.to(device), sspear_parse.shakespeare[6200:7000], length=800, temperature=1, topk=10)
     # models = os.listdir("./models")
     # models.sort()
     # print(models[-1])
@@ -229,7 +262,9 @@ def main():
     # model = rnn.StandardRNN(ALPHABET_SIZE, int(match.group(3)) - ALPHABET_SIZE, ALPHABET_SIZE, hidden_layers=int(match.group(2)))
     # model.load_state_dict(torch.load("./models/" + models[-1]))
     # # sample from the model
-    sample_transformer(model.to(device), input("prompt?:\n"), length=800, temperature=0, topk=10)
+    test_str = "PROMETHIUS."
+    sample_transformer_generate_mode(model.to(device), test_str, length=4000, temperature=0, topk=5)
+    sample_transformer_generate_mode(model.to(device), input("prompt?:\n"), length=800, temperature=0, topk=10)
     # f = open("./textsamples/" + models[-1] + ".txt", "w")
     # f.write(s) 
     # f.close()

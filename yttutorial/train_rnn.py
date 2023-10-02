@@ -2,10 +2,10 @@ from rnn import RNN, StandardRNN
 import torch
 import torchvision
 import torchvision.transforms as transforms
-import tokenizer
+import train.tokenizer as tokenizer
 device = torch.device('cuda')
 import os
-import sspear_parse
+import train.parsedfiles as parsedfiles
 import torch.nn as nn
 import time
 import torch.nn.functional as F
@@ -87,7 +87,7 @@ def train(model, epochs = 10, batchsize = 40, runlength = 500):
         # decay learning rate   
         running_loss = 0.0
         t0 = time.time()
-        for batchnextwords in sspear_parse.nexwords500batched(batchsize, runlength=runlength):
+        for batchnextwords in parsedfiles.nexwords500batched(batchsize, runlength=runlength):
             for _ in range(1):
                 optimizer.zero_grad()
                 h_i = model.initHidden(batchsize=batchsize)
