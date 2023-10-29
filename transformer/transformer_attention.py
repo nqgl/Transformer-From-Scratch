@@ -165,8 +165,7 @@ class MaskedMultiHeadSDPAttention(nn.Module):
 
 
 def main():
-    import train.parsedfiles as parsedfiles
-    import tokenizer
+    from ..traindata import parsedfiles, tokenizer
     tokens = parsedfiles.sspeare_tensor[200:300]
     tokens = tokens.unsqueeze(0)
     att = LearnedProjectionAttention(10, 10, tokenizer.ALPHABET_SIZE)

@@ -1,8 +1,8 @@
 import torch as t
 import torch.nn as nn
 import torch.nn.functional as F
-import transformer.mlp as mlp
-import transformer_attention
+from transformer import mlp
+from transformer import transformer_attention
 from typing import List
 class TransformerEncoderLayer(nn.Module):
     def __init__(self, d_model, h, d_ff, P_dropout):
@@ -105,10 +105,10 @@ def most_recent_model(path=None):
     import re
     import pickle
     import numpy as np
-    files = glob.glob('./models/sspeare_ztransformer_*.pt' if path is None else path)
+    files = glob.glob('models/sspeare_ztransformer_*.pt' if path is None else path)
     files = sorted(files, key=lambda s: int(re.findall(r'\d+', s)[-1]))
     print(files[-1])
-    model = DecoderOnlyTransformer(128,4, 512, 0.2, 6)
+    model = DecoderOnlyTransformer(128,4, 512, 0.25, 6)
     model.load_state_dict(t.load(files[-1]))
     return model
 

@@ -14,7 +14,7 @@ def char_to_index(c):
 dtype = torch.float32
 ALPHABET_SIZE = len(alphabet) + 1 + 64
 print(ALPHABET_SIZE)
-device = torch.device('cuda')
+device = torch.device('cpu')
 
 char_to_tensor = {}
 for char in alphabet:
@@ -167,20 +167,18 @@ def sample_transformer(model, start_string, length=100, temperature=1, topk=5, s
         return output_string
 
 def sample_transformer_generate_mode(model, start_string, length=100, temperature=1, topk=5, show=True):
-    import transformer
+    from transformer import transformer
     model.eval()
     with torch.no_grad():
         input = string_to_tensor(start_string)
         output_string = start_string
-        model.begin_generate(length + len(start_string), batchsize=1)
+        model.begin_generate(length + len(start_string), batchsize=1, device=device)
         output = model.generate_first(input.reshape(1,  -1, ALPHABET_SIZE))
         char_pred = output[:, -1]
         # print(transformer.inspect(model))
         if show:
             print(output_string, end="")
         for i in range(length):
-            if (i + len(start_string)) % 400 == 0:
-                print("\n", i + len(start_string))
             torch.cuda.empty_cache()
             char = tensor_to_string_stochastic(char_pred, temperature=temperature, topk=topk)
             print(char, end="") if show else None
@@ -201,7 +199,6 @@ class LazyTokenized:
     def __init__(self, string):
         self.string = string
         self.tensor = torch.zeros(len(string), ALPHABET_SIZE, dtype=dtype, device=device)
-        self.accessed = torch.zeros(len(string), dtype=torch.bool, device=device)
 
     def __getitem__(self, idx):
         if type(idx) == slice:
@@ -210,14 +207,14 @@ class LazyTokenized:
                 start -= stop - len(self.string) +  1
                 stop = len(self.string) - 1
             idx = slice(start, stop, step)
-            access = self.accessed[idx]
-            if not torch.all(access):
-                self.tensor[idx] = string_to_tensor(self.string[idx])
-                self.accessed[idx] = True
+        
+            self.tensor[idx] = string_to_tensor(self.string[idx])
             return self.tensor[idx]
         else:
             raise NotImplementedError()
 
+    def __len__(self):
+        return len(self.string)
 # s = "here is a ySsample string"
 # print(s)
 # te = string_to_tensor(s)
@@ -234,9 +231,10 @@ def get_char_freqs(string):
     cfv.to(device)
     return cfv
 def main():
-    import transformer
+    from transformer import transformer
+    
     # open model at models/sspear_rnn_1.pt
-    import rnn
+    # import rnn
     # model = rnn.RNN(ALPHABET_SIZE, 220, ALPHABET_SIZE, hidden_layers=130)
     # # model.load_state_dict(torch.load("./models/sspear_rnn_1.pt"))
     model1600 =  transformer.most_recent_model("/home/g/learn/dl/torch/models/sspeare_ztransformer_1784.128-4_512-0.1-6_epoch4.pt")
@@ -246,7 +244,7 @@ def main():
     # # s = sample_rnn(model.to(device), "q", length=100, temperature=0.5, topk=5)
     # get most recent model's path from models/
     import os
-    import train.parsedfiles as parsedfiles
+    import parsedfiles
     model = model800
     model2 = transformer.most_recent_model("/home/g/learn/dl/torch/models/sspeare_ztransformer_1839*")
     model = model2

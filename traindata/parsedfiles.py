@@ -1,4 +1,5 @@
-shakespeare = open('', 'r').read()
+shakespeare = open('traindata/texts/t8.shakespeare.txt', 'r').read()
+moby_dick = open("traindata/texts/hm/moby10b.txt", "r").read()
 startpoints = [i for i in range(len(shakespeare)) if shakespeare.startswith('\n\n', i)]
 s = startpoints[504]
 print(len(shakespeare))
@@ -10,17 +11,34 @@ snippets = [shakespeare[startpoints[i]:startpoints[i+1]] for i in range(len(star
 
 splengths = [startpoints[i+1]-startpoints[i] for i in range(len(startpoints)-1)]
 
-import tokenizer
+import traindata.tokenizer as tokenizer
 import torch
 import time
-cuda0 = torch.device('cuda:0')
-
+print(len(moby_dick))
 sspeare_tensor = tokenizer.LazyTokenized(shakespeare)
+moby_tensor = tokenizer.LazyTokenized(moby_dick)
 # snippets = [tokenizer.string_to_tensor(s) for s in snippets]
 # snippets500 = [tokenizer.string_to_tensor(s) for s in snippets500]
 
 
 
+
+melville_books_list = [
+        open("traindata/texts/hm/moby10b.txt", "r").read(),
+        open("traindata/texts/hm/8118-0.txt").read(),
+        open("traindata/texts/hm/pg11231.txt").read(),
+        open("traindata/texts/hm/pg34970.txt").read(),
+        open("traindata/texts/hm/pg12384.txt").read(),
+        open("traindata/texts/hm/piazza.txt").read(),
+        open("traindata/texts/hm/pg10712.txt").read(),
+        open("traindata/texts/hm/pg21816.txt").read(),
+        open("traindata/texts/hm/typee.txt").read()]
+melville_booktensors_list = [tokenizer.LazyTokenized(x) for x in melville_books_list]
+print([len(b) for b in melville_books_list])
+hhgttg = open("traindata/texts/hhgttg.txt").read()
+hhgttg_tensor = tokenizer.LazyTokenized(hhgttg)
+wiki = open("traindata/texts/wiki/train.jsonl").read()
+wiki_tensor = tokenizer.LazyTokenized(wiki)
 # nextwords500 = [torch.zeros(len(snippets500), tokenizer.ALPHABET_SIZE) for i in range(len(snippets500))]
 # for i in range(500):
 #     for j in range(len(snippets500)):
@@ -41,20 +59,8 @@ def nexwords500batched(batchsize, runlength=500):
 #batches = nexwords500batched(10)
 # print(len(nextwords500))    
 
-char_freqs = torch.tensor([1.0000e+00, 2.8915e+05, 6.1956e+04, 8.8185e+04, 1.4946e+05, 4.4720e+05,
-        8.0516e+04, 6.8199e+04, 2.3687e+05, 2.5399e+05, 4.7790e+03, 3.5408e+04,
-        1.7002e+05, 1.1145e+05, 2.4326e+05, 3.1460e+05, 5.8464e+04, 3.5820e+03,
-        2.3786e+05, 2.4899e+05, 3.2978e+05, 1.2895e+05, 3.7569e+04, 8.9390e+04,
-        5.2940e+03, 9.4370e+04, 1.6310e+03, 2.9900e+02, 9.2800e+02, 3.6600e+02,
-        3.3000e+02, 9.3000e+01, 8.2000e+01, 6.3000e+01, 4.1000e+01, 4.0000e+01,
-        9.4800e+02, 1.2939e+06, 0.0000e+00, 8.3174e+04, 1.7199e+04, 7.8025e+04,
-        8.8440e+03, 1.0476e+04, 1.8270e+03, 0.0000e+00, 4.7000e+02, 5.0000e+00,
-        0.0000e+00, 3.3000e+01, 7.1000e+01, 8.0000e+00, 1.0000e+00, 0.0000e+00,
-        1.0000e+00, 0.0000e+00, 2.1000e+01, 6.3000e+01, 1.0000e+00, 1.0000e+00,
-        0.0000e+00, 8.0740e+03, 1.0000e+00, 4.6800e+02, 4.4100e+02, 6.2800e+02,
-        6.2900e+02, 2.0850e+03, 2.0770e+03, 0.0000e+00, 2.0000e+00, 1.2446e+05,
-        0.0000e+00, 3.1069e+04]).to(cuda0)
 
+def main():
+    print(len(wiki) / (6 * 500 * 2 * 4200))
 if __name__ == "__main__":
-    import tokenizer
-    print(tokenizer.get_char_freqs(shakespeare))
+    main()
