@@ -11,8 +11,17 @@ def main():
     import os
     model = model_hhgttg
     test_str = "The Heart of Gold's"
-    tokenizer.sample_transformer_generate_mode(model, test_str, length=3100, temperature=0.8, topk=10)
-    tokenizer.sample_transformer_generate_mode(model, input("prompt?:\n"), length=800, temperature=1, topk=5)
+    # tokenizer.sample_transformer_generate_mode(model, test_str, length=3100, temperature=0.8, topk=10)
+    temperature=5
+    k=10
+    prompt = input("prompt?:\n")
+    tokenizer.sample_transformer_generate_mode(model, prompt, length=800, temperature=temperature, topk=k)
+    print("\n\n\n")
+    tokenizer.sample_transformer_generate_mode(model_moby, prompt, length=800, temperature=temperature, topk=k)
+    print("\n\n\n")
+    tokenizer.sample_transformer_generate_mode(model_before, prompt, length=800, temperature=temperature, topk=k)
+
+
 
 if __name__ == "__main__":
     main()
